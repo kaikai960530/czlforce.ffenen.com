@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="./CZL_files/font.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自動更新數據網站</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'GFF Latin', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+        }
+
+        .background {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            background: url('PNG/IMN.png') no-repeat center center;
+            background-size: cover;
+        }
+
+        .data-container {
+            position: absolute;
+            color: white;
+            font-size: 5vw; /* 使用 vw 单位确保等比缩放 */
+            transform: translate(-50%, -50%);
+        }
+
+        #data1 { top: 45%; left: 19%; }
+        #data2 { top: 45%; left: 50%; }
+        #data3 { top: 45%; left: 75%; }
+
+        .update-time {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            color: white;
+            font-size: 1.5vw;
+        }
+    </style>
+</head>
+<body>
+    <div class="background">
+        <div id="data1" class="data-container">數值 1</div>
+        <div id="data2" class="data-container">數值 2</div>
+        <div id="data3" class="data-container">數值 3</div>
+        <div id="update-time" class="update-time">更新時間: N/A</div>
+    </div>
+
+    <script>
+        const sheetId = '1dccas2O1yWUGdKot8WK_KnpElZSDk2bfm-nxVcAAOv4';
+        const apiKey = 'AIzaSyDCpZh3hJxy5VEDXBTqkSkauHuR99CXIvk';
+
+        function fetchData() {
+            const ranges = ['即時數據!A2', '即時數據!B2', '即時數據!C2'];
+            const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values:batchGet?ranges=${ranges.join('&ranges=')}&key=${apiKey}`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    const values = data.valueRanges.map(range => range.values[0][0]);
+                    document.getElementById('data1').textContent = values[0] || 'N/A';
+                    document.getElementById('data2').textContent = values[1] || 'N/A';
+                    document.getElementById('data3').textContent = values[2] || 'N/A';
+
+                    const updateTime = new Date().toLocaleString();
+                    document.getElementById('update-time').textContent = `更新時間: ${updateTime}`;
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        }
+
+        fetchData();
+        setInterval(fetchData, 15000); // 每15秒更新一次
+    </script>
+</body>
+</html>
